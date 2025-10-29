@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { Task, TaskList, Subtask } from './types';
 import { ICONS } from './constants';
 import Sidebar from './components/Sidebar';
@@ -29,10 +29,44 @@ const initialTaskLists: TaskList[] = [
 ];
 
 const App: React.FC = () => {
-    const [taskLists, setTaskLists] = useState<TaskList[]>(initialTaskLists);
-    const [activeListId, setActiveListId] = useState<string>('my-tasks');
+    const [taskLists, setTaskLists] = useState<TaskList[]>(() => {
+        try {
+            const savedLists = localStorage.getItem('taskLists');
+            return savedLists ? JSON.parse(savedLists) : initialTaskLists;
+        } catch (error) {
+            console.error("Failed to parse task lists from localStorage", error);
+            return initialTaskLists;
+        }
+    });
+
+    const [activeListId, setActiveListId] = useState<string>(() => {
+        const savedActiveListId = localStorage.getItem('activeListId');
+        // Ensure the saved ID is valid
+        const lists = taskLists;
+        if (savedActiveListId && lists.some(l => l.id === savedActiveListId)) {
+            return savedActiveListId;
+        }
+        return lists.length > 0 ? lists[0].id : '';
+    });
+
     const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
-    const [isSidebarOpen, setSidebarOpen] = useState<boolean>(true);
+    
+    const [isSidebarOpen, setSidebarOpen] = useState<boolean>(() => {
+        const savedState = localStorage.getItem('isSidebarOpen');
+        return savedState ? JSON.parse(savedState) : true;
+    });
+
+    useEffect(() => {
+        localStorage.setItem('taskLists', JSON.stringify(taskLists));
+    }, [taskLists]);
+
+    useEffect(() => {
+        localStorage.setItem('activeListId', activeListId);
+    }, [activeListId]);
+
+    useEffect(() => {
+        localStorage.setItem('isSidebarOpen', JSON.stringify(isSidebarOpen));
+    }, [isSidebarOpen]);
 
     const activeList = useMemo(() => 
         taskLists.find(list => list.id === activeListId) || null,
@@ -135,14 +169,15 @@ const App: React.FC = () => {
     };
 
     const handleDeleteList = (listId: string) => {
-        const remainingLists = taskLists.filter(list => list.id !== listId);
-        setTaskLists(remainingLists);
-    
-        if (activeListId === listId) {
-            const newActiveListId = remainingLists.length > 0 ? remainingLists[0].id : '';
-            setActiveListId(newActiveListId);
-            setSelectedTaskId(null);
-        }
+        setTaskLists(prevLists => {
+            const remainingLists = prevLists.filter(list => list.id !== listId);
+            if (activeListId === listId) {
+                const newActiveListId = remainingLists.length > 0 ? remainingLists[0].id : '';
+                setActiveListId(newActiveListId);
+                setSelectedTaskId(null);
+            }
+            return remainingLists;
+        });
     };
 
     const handleSelectTask = (taskId: string | null) => {

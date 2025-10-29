@@ -53,6 +53,12 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({
         }
     };
 
+    const creationDate = new Date(task.createdAt).toLocaleDateString('es-ES', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+    });
+
     return (
         <div className={`fixed top-0 right-0 h-full w-full md:w-96 bg-white border-l border-gray-200 shadow-xl transform transition-transform duration-300 ease-in-out z-30 ${task ? 'translate-x-0' : 'translate-x-full'}`}>
             <div className="h-full flex flex-col">
@@ -122,6 +128,9 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({
                         </form>
                     </div>
                 </div>
+                <footer className="flex-shrink-0 p-4 text-center text-xs text-gray-500 border-t border-gray-200">
+                    Creado el {creationDate}
+                </footer>
             </div>
         </div>
     );
