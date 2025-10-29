@@ -1,0 +1,5 @@
+{
+  "name": "Gestor de Tareas (Clon de Google Tasks)",
+  "description": "Una aplicación web para gestionar tus tareas diarias, inspirada en la simplicidad y eficiencia de Google Tasks. Organiza tus tareas en listas, añade subtareas, marca las importantes y mantén tu productividad al máximo.",
+  "requestFramePermissions": []
+}
