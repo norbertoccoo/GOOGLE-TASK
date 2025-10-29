@@ -134,6 +134,17 @@ const App: React.FC = () => {
         setActiveListId(newList.id);
     };
 
+    const handleDeleteList = (listId: string) => {
+        const remainingLists = taskLists.filter(list => list.id !== listId);
+        setTaskLists(remainingLists);
+    
+        if (activeListId === listId) {
+            const newActiveListId = remainingLists.length > 0 ? remainingLists[0].id : '';
+            setActiveListId(newActiveListId);
+            setSelectedTaskId(null);
+        }
+    };
+
     const handleSelectTask = (taskId: string | null) => {
         setSelectedTaskId(taskId);
     };
@@ -160,10 +171,11 @@ const App: React.FC = () => {
                     activeListId={activeListId}
                     onSelectList={setActiveListId}
                     onAddList={handleAddList}
+                    onDeleteList={handleDeleteList}
                 />
                 
                 <div className={`flex-grow transition-all duration-300 ${isSidebarOpen ? 'md:ml-64' : 'ml-0'}`}>
-                    {activeList && (
+                    {activeList ? (
                         <TaskListComponent 
                             taskList={activeList}
                             onAddTask={(title) => handleAddTask(activeList.id, title)}
@@ -171,6 +183,10 @@ const App: React.FC = () => {
                             onUpdateTask={handleUpdateTask}
                             selectedTaskId={selectedTaskId}
                         />
+                    ) : (
+                        <div className="h-full flex items-center justify-center bg-gray-50">
+                            <p className="text-gray-500">Seleccione una lista o cree una nueva.</p>
+                        </div>
                     )}
                 </div>
                 

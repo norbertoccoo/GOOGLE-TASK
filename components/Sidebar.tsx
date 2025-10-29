@@ -8,9 +8,10 @@ interface SidebarProps {
     activeListId: string;
     onSelectList: (id: string) => void;
     onAddList: (name: string) => void;
+    onDeleteList: (id: string) => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ isOpen, taskLists, activeListId, onSelectList, onAddList }) => {
+const Sidebar: React.FC<SidebarProps> = ({ isOpen, taskLists, activeListId, onSelectList, onAddList, onDeleteList }) => {
     const [newListName, setNewListName] = useState('');
     const [isCreating, setIsCreating] = useState(false);
 
@@ -36,15 +37,27 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, taskLists, activeListId, onSe
             <nav className="py-4">
                 <ul>
                     {taskLists.map(list => (
-                        <li key={list.id}>
+                        <li key={list.id} className="group relative">
                             <a
                                 href="#"
                                 onClick={(e) => { e.preventDefault(); onSelectList(list.id); }}
-                                className={`flex items-center px-6 py-2 text-sm font-medium ${activeListId === list.id ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'}`}
+                                className={`flex items-center w-full pl-6 pr-10 py-2 text-sm font-medium ${activeListId === list.id ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'}`}
                             >
                                 <ICONS.list className={`h-5 w-5 mr-3 ${activeListId === list.id ? 'text-blue-600' : 'text-gray-500'}`} />
-                                {list.name}
+                                <span className="truncate">{list.name}</span>
                             </a>
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (window.confirm(`¿Estás seguro de que quieres eliminar la lista "${list.name}" y todas sus tareas? Esta acción no se puede deshacer.`)) {
+                                        onDeleteList(list.id);
+                                    }
+                                }}
+                                className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-gray-200 opacity-0 group-hover:opacity-100 transition-opacity"
+                                aria-label={`Eliminar la lista ${list.name}`}
+                            >
+                                <ICONS.trash className="h-4 w-4 text-gray-500" />
+                            </button>
                         </li>
                     ))}
                 </ul>
